@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 2d0a222ccfa95f647a52041c738bc728
+  m_SerializeEntries:
+  - m_GUID: 2858d8089dcb7934a9f7045bd10338d0
+    m_Address: 3D/Keqing/Keqing
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 9887c652d43b0d74fad8cd65ffff6d21
+    m_Address: "3D/Keqing/textures/\u9762"
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 62d0349fdb6a53340b919ef3924440b9
+    m_Address: "3D/Keqing/textures/\u53D1"
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: e599cdff45433e84d9b555618a7345b9
+    m_Address: "3D/Keqing/textures/\u670D"
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: bbaf33fa48b512b49983efdebaccddc3
+    m_Address: "3D/Keqing/textures/\u808C"
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: eb6c227d692cc17479e6234df8391a41
+    m_Address: "3D/Keqing/textures/\u8868\u60C5"
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 4530937b896ea7547a0de85abfb6a8da
+    m_Address: 3D/Keqing/idk what this is but im gonna leave it in/hair-sph
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 0fbf6b49672596c4e9c3ebe83da6350e
+    m_Address: 3D/Keqing/idk what this is but im gonna leave it in/st
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 952d8b2a1b00e8c49aae45b7e65f1779
+    m_Address: Prefabs/VFX_Scanner/VFX_Scanner
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 272d921f09487104d9f68339d834f371
+    m_Address: Audio/In Heat x  BrooklynBloodPop! (Full Tiktok Ver.)
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 1e2a4123a27a43146b14cecb51554068, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 20d7f68f8d8d4dd4d8048e6f3b590c91, type: 2}
+    - {fileID: 11400000, guid: dc323520efb176848a278eb46ab90202, type: 2}
