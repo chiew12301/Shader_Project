@@ -1,219 +1,256 @@
+using System;
 using System.Collections.Generic;
-using UnityEngine.Events;
+using UnityEngine;
 
 /*
  * How To Use? Tutorial
  * When creating a new event, please create an event based on AnEvent class.
- * Then when adding Listener add according to example in OnEnable()->  EventManager.INSTANCE.AddListener(new ADeEvent(), AFunction);
+ * Then when adding Listener add according to example in OnEnable()->  EventManager.INSTANCE.AddListener<ADeEvent>(this.yourmethodname));
  * Remember to add RemoveListener in OnDisable by replacing AddListener to RemoveListener
- * After that, When you trying to call event, please use AddEvent([YourEventClass]). Example -> EventManager.INSTANCE.AddEvent(new BDeEvent());
+ * After that, When you trying to call event, please use AddEvent([YourEventClass]). Example -> EventManager.INSTANCE.AddEvent(new BDeEvent("If you have parameter"));
  * That's all!
  * 
  * Refer to AnEvent to create an event
  * 
  */
 
-public class EventManager : MonobehaviourSingleton<EventManager>
+namespace KC_Custom
 {
-    private Dictionary<AnEvent, UnityEvent> m_eventsDict = null;
-
-    private Dictionary<AnEvent, UnityEvent<object>> m_events2Dict = null;
-
-    private Dictionary<AnEvent, List<System.Action<AnEvent>>> m_event3Dict = null;
-
-    //==================================================
-
-    #region OVERRIDE
-
-    protected override void OnEnable()
+    public enum EEVENTRESULT
     {
-        base.OnEnable();
-        this.Init();
+        EVENT_NOTIFY_SUCCESS = 0,
+        EVENT_NOTIFY_FAILED___ON_SCENE_CHANGE,
+        EVENT_NOTIFY_FAILED___NO_LISTENER,
+        EVENT_NOTIFY_FAILED___ON_APPLICATION_QUIT
     }
 
-    protected override void OnDisable()
+    public class EventManager : MonobehaviourSingleton<EventManager>
     {
-        base.OnDisable();
-        this.Uninit();
-    }
+        private Dictionary<System.Type, EventAction> m_listenerDict = new Dictionary<System.Type, EventAction>();
+        private Dictionary<Delegate, EventAction> m_lookupDict = new Dictionary<Delegate, EventAction>();
 
-    #endregion OVERRIDE
+        private Dictionary<System.Type, EventAction> m_dontDestroyListenerDict = new Dictionary<System.Type, EventAction>();
+        private Dictionary<Delegate, EventAction> m_dontDestroyLookupDict = new Dictionary<Delegate, EventAction>();
 
-    //==================================================
+        private static bool _On_PAUSED = false;
+        private static bool _ON_SCENE_CHANGE = false;
+        private static bool _ON_APPLICATION_QUIT = false;
 
-    #region FUNCTIONS
+        // ==================================================
 
-    //Public Function Below
+        #region Singleton Init
 
-    public void AddListenerTwo<T>(AnEvent eventToAssign, UnityAction<T> listener) where T : AnEvent
-    {
-        if (GetInstance() == null) return;
-
-        UnityEvent<T> thisEventTwo = new UnityEvent<T>();
-
-        System.Action<T> thisEventThree = new System.Action<T>(listener);
-
-
-        if (null == GetInstance().m_events2Dict)
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+        private static void InitBeforeSplashScreen()
         {
-            GetInstance().m_events2Dict = new Dictionary<AnEvent, UnityEvent<object>>();
+            EventManager obj = new GameObject("EVENT_MANAGER").AddComponent<EventManager>();
+            DontDestroyOnLoad(obj.gameObject);
         }
 
-        if(null == GetInstance().m_event3Dict)
+        #endregion Singleton Init
+
+        //==================================================
+
+        #region OVERRIDE
+
+        protected override void OnEnable()
         {
-            GetInstance().m_event3Dict = new Dictionary<AnEvent, List<System.Action<AnEvent>>>();
+            base.OnEnable();
+            SceneManager.beforeLoadScene += this.OnBeforeLoadScene;
+            SceneManager.sceneUnloaded += this.OnPreviousSceneUnloaded;
         }
 
-        foreach (AnEvent e in GetInstance().m_event3Dict.Keys)
+        protected override void OnDisable()
         {
-            if (e.GetType().ToString() == eventToAssign.GetType().ToString())
+            this.Clear();
+            this.m_dontDestroyLookupDict.Clear();
+            this.m_dontDestroyListenerDict.Clear();
+            SceneManager.sceneUnloaded -= this.OnPreviousSceneUnloaded;
+            SceneManager.beforeLoadScene -= this.OnBeforeLoadScene;
+            base.OnDisable();
+        }
+
+        protected override void OnApplicationPause(bool pause)
+        {
+            base.OnApplicationPause(pause);
+            _On_PAUSED = pause;
+        }
+
+        protected override void OnApplicationQuit()
+        {
+            base.OnApplicationQuit();
+            if (!_ON_APPLICATION_QUIT)
             {
-                GetInstance().m_event3Dict[e].Add(thisEventThree as System.Action<AnEvent>);
-                return;
+                _ON_APPLICATION_QUIT = true;
             }
         }
 
-        //List<System.Action<AnEvent>> newList = new List<System.Action<AnEvent>>();
-        //newList.Add(thisEventThree);
+        #endregion OVERRIDE
 
-        //INSTANCE.m_event3Dict.Add(eventToAssign, newList);
+        //==================================================
 
-        foreach (AnEvent e in GetInstance().m_events2Dict.Keys)
+        #region FUNCTIONS
+
+        #region load scene methods
+
+        private void OnBeforeLoadScene(UnityEngine.SceneManagement.LoadSceneMode mode)
         {
-            if (e.GetType().ToString() == eventToAssign.GetType().ToString())
+            if (mode == UnityEngine.SceneManagement.LoadSceneMode.Single)
             {
-                thisEventTwo = GetInstance().m_events2Dict[e] as UnityEvent<T>;
-                thisEventTwo.AddListener(listener);              
-                return;
+                _ON_SCENE_CHANGE = true;
+                this.Clear();
             }
         }
 
-        thisEventTwo.AddListener(listener);
-        UnityEvent<object> tryCast = thisEventTwo as UnityEvent<object>;
-        //UnityEngine.Debug.Log(tryCast.GetType().ToString());
-        if(tryCast == null)
+        private void OnPreviousSceneUnloaded(UnityEngine.SceneManagement.Scene scene)
         {
-            UnityEngine.Debug.Log(":O");
-            object obj = System.Convert.ChangeType(thisEventTwo, typeof(UnityEvent<object>));
-        }
-        UnityEngine.Debug.Log(listener.GetType().ToString() + " " + thisEventTwo.GetType().ToString());
-        GetInstance().m_events2Dict.Add(eventToAssign, tryCast);
-    }
-
-    public void AddListener(AnEvent eventToAssign, UnityAction listener)
-    {
-        if (GetInstance() == null) return;
-
-        UnityEvent thisEvent = null;
-
-        if (null == GetInstance().m_eventsDict)
-        {
-            GetInstance().m_eventsDict = new Dictionary<AnEvent, UnityEvent>();
+            _ON_SCENE_CHANGE = false;
         }
 
-        foreach (AnEvent e in GetInstance().m_eventsDict.Keys)
+        #endregion load scene methods
+
+        //Public Function Below
+
+        public static EEVENTRESULT AddEvent(AnEvent evt)
         {
-            if(e.GetType().ToString() == eventToAssign.GetType().ToString())
+            if (_ON_APPLICATION_QUIT) { return EEVENTRESULT.EVENT_NOTIFY_FAILED___ON_APPLICATION_QUIT; }
+
+
+            return GetInstance().AddEvent_Private(evt);
+        }
+
+        public static void AddListener<T>(GenericEventAction<T> listener) where T : AnEvent
+        {
+            if (_ON_APPLICATION_QUIT) { return; }
+            GetInstance().AddListener_Private<T>(listener);
+        }
+
+        public static void RemoveListener<T>(GenericEventAction<T> listener) where T : AnEvent
+        {
+            //if ( _ON_SCENE_CHANGE || _ON_APPLICATION_QUIT ) { return; }
+            GetInstance().RemoveListener_Private<T>(listener);
+        }
+
+        public static void AddDontDestroyListener<T>(GenericEventAction<T> listener) where T : AnEvent
+        {
+            if (_ON_SCENE_CHANGE || _ON_APPLICATION_QUIT) { return; }
+            GetInstance().AddDontDestroyListener_Private<T>(listener);
+        }
+
+        public static void RemoveDontDestroyListener<T>(GenericEventAction<T> listener) where T : AnEvent
+        {
+            //if ( _ON_SCENE_CHANGE || _ON_APPLICATION_QUIT ) { return; }
+            GetInstance().RemoveDontDestroyListener_Private<T>(listener);
+        }
+
+
+        //Private Function Below
+
+        private EEVENTRESULT AddEvent_Private(AnEvent evt)
+        {
+            EventAction listener;
+            if (!this.m_listenerDict.TryGetValue(evt.GetType(), out listener))
             {
-                thisEvent = GetInstance().m_eventsDict[e];
-                thisEvent.AddListener(listener);
-                return;
+                Debug.Log("[EventManager WARNING] Add Event Failed: " + evt.GetType());
+                return EEVENTRESULT.EVENT_NOTIFY_FAILED___NO_LISTENER;
+            }
+
+            listener.Invoke(evt);
+            return EEVENTRESULT.EVENT_NOTIFY_SUCCESS;
+        }
+
+        private void AddListener_Private<T>(GenericEventAction<T> listener) where T : AnEvent
+        {
+            // To avoid multiple registration of same listener
+            if (this.m_lookupDict.ContainsKey(listener))
+            { return; }
+
+            EventAction actualListener = (evt) => listener(evt as T);
+            this.m_lookupDict[listener] = actualListener;
+
+            EventAction tempListener;
+            if (this.m_listenerDict.TryGetValue(typeof(T), out tempListener))
+            {
+                this.m_listenerDict[typeof(T)] = tempListener += actualListener;
+            }
+            else
+            {
+                this.m_listenerDict[typeof(T)] = actualListener;
             }
         }
 
-        thisEvent = new UnityEvent();
-        thisEvent.AddListener(listener);
-        GetInstance().m_eventsDict.Add(eventToAssign, thisEvent);
-    }
-
-    public void RemoveListener(AnEvent eventToAssign, UnityAction listener)
-    {
-        if (GetInstance() == null) return;
-
-        UnityEvent thisEvent = null;
-
-        foreach (AnEvent e in GetInstance().m_eventsDict.Keys)
+        private void RemoveListener_Private<T>(GenericEventAction<T> listener) where T : AnEvent
         {
-            if (e.GetType().ToString() == eventToAssign.GetType().ToString())
+            EventAction actualListener;
+            if (this.m_lookupDict.TryGetValue(listener, out actualListener))
             {
-                thisEvent = GetInstance().m_eventsDict[e];
-                thisEvent.RemoveListener(listener);
-                return;
+                EventAction tempListener;
+                if (this.m_listenerDict.TryGetValue(typeof(T), out tempListener))
+                {
+                    tempListener -= actualListener;
+                    if (tempListener == null)
+                    {
+                        this.m_listenerDict.Remove(typeof(T));
+                    }
+                    else
+                    {
+                        this.m_listenerDict[typeof(T)] = tempListener;
+                    }
+                }
+                this.m_lookupDict.Remove(listener);
             }
         }
-    }
 
-    public void RemoveListenerTwo<T>(AnEvent eventToAssign, UnityAction<T> listener) where T : AnEvent
-    {
-        if (GetInstance() == null) return;
-
-        UnityEvent<T> thisEvent = null;
-
-        foreach (AnEvent e in GetInstance().m_events2Dict.Keys)
+        private void AddDontDestroyListener_Private<T>(GenericEventAction<T> listener) where T : AnEvent
         {
-            if (e.GetType().ToString() == eventToAssign.GetType().ToString())
+            // To avoid multiple registration of same listener
+            if (this.m_dontDestroyLookupDict.ContainsKey(listener))
+            { return; }
+
+            EventAction actualListener = (evt) => listener(evt as T);
+            this.m_dontDestroyLookupDict[listener] = actualListener;
+
+            EventAction tempListener;
+            if (this.m_dontDestroyListenerDict.TryGetValue(typeof(T), out tempListener))
             {
-                thisEvent = GetInstance().m_events2Dict[e] as UnityEvent<T>;
-                thisEvent.RemoveListener(listener);
-                return;
+                this.m_dontDestroyListenerDict[typeof(T)] = tempListener += actualListener;
+            }
+            else
+            {
+                this.m_dontDestroyListenerDict[typeof(T)] = actualListener;
             }
         }
-    }
 
-    public void AddEvent(AnEvent eventToAssign)
-    {
-        if (GetInstance() == null) return;
-
-        UnityEvent thisEvent = null;
-
-        foreach (AnEvent e in GetInstance().m_eventsDict.Keys)
+        private void RemoveDontDestroyListener_Private<T>(GenericEventAction<T> listener) where T : AnEvent
         {
-            if (e.GetType().ToString() == eventToAssign.GetType().ToString())
+            EventAction actualListener;
+            if (this.m_dontDestroyLookupDict.TryGetValue(listener, out actualListener))
             {
-                thisEvent = GetInstance().m_eventsDict[e];
-                thisEvent?.Invoke();
-                return;
+                EventAction tempListener;
+                if (this.m_dontDestroyListenerDict.TryGetValue(typeof(T), out tempListener))
+                {
+                    tempListener -= actualListener;
+                    if (tempListener == null)
+                    {
+                        this.m_dontDestroyListenerDict.Remove(typeof(T));
+                    }
+                    else
+                    {
+                        this.m_dontDestroyListenerDict[typeof(T)] = tempListener;
+                    }
+                }
+                this.m_dontDestroyLookupDict.Remove(listener);
             }
         }
+        private void Clear()
+        {
+            this.m_lookupDict.Clear();
+            this.m_listenerDict.Clear();
+        }
+
+        #endregion FUNCTIONS
+
+        //==================================================
     }
 
-    public void AddEvent2(AnEvent eventToAssign)
-    {
-        if (GetInstance() == null) return;
-
-        foreach (AnEvent e in GetInstance().m_events2Dict.Keys)
-        {
-            if (e.GetType().ToString() == eventToAssign.GetType().ToString())
-            {
-                UnityEngine.Debug.Log(GetInstance().m_events2Dict[e].ToString());
-                GetInstance().m_events2Dict[e]?.Invoke(eventToAssign);
-                return;
-            }
-        }
-    }    
-
-    //Private Function Below
-
-    private void Init()
-    {
-        if(null == this.m_eventsDict)
-        {
-            this.m_eventsDict = new Dictionary<AnEvent, UnityEvent>();
-        }
-    }
-
-    private void Uninit()
-    {
-        if(null != this.m_eventsDict)
-        {
-            foreach(AnEvent e in GetInstance().m_eventsDict.Keys)
-            {
-                GetInstance().m_eventsDict[e].RemoveAllListeners();
-            }
-        }
-    }
-
-    #endregion FUNCTIONS
-
-    //==================================================
 }

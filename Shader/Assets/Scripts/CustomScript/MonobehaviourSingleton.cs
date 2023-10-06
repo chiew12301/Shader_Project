@@ -1,90 +1,101 @@
+using Microsoft.Unity.VisualStudio.Editor;
 using UnityEngine;
 
-public class MonobehaviourSingleton<T> : MonoBehaviour where T : MonobehaviourSingleton<T>
+namespace KC_Custom
 {
-    private static T _INSTANCE;
-    //public static T INSTANCE
-    //{
-    //    get
-    //    {
-    //        return GetInstance(true, false);
-    //    }
-    //    private set { }
-    //}
-
-    public static T GetInstance(bool createNewIfNull = false, bool debug = false, bool dontDestroy = false)
+    public class MonobehaviourSingleton<T> : MonoBehaviour where T : MonobehaviourSingleton<T>
     {
-        if (applicationIsQuitting) return null;
+        private static T _INSTANCE;
+        private static object _PADLOCK = new object();
 
-        if (_INSTANCE == null)
+        public static T GetInstance(bool createNewIfNull = false, bool debug = false, bool dontDestroy = false)
         {
-            T[] assetsCreated = FindObjectsOfType<T>();
-            if (assetsCreated == null || assetsCreated.Length <= 0)
+            lock(_PADLOCK )
             {
-                if(debug)
-                {
-                    throw new System.Exception("No Singleton is created, could not find any monobehavioursingleton object in the hierarchy");
-                }
+                if (applicationIsQuitting) return null;
 
-                if (createNewIfNull)
+                if (_INSTANCE == null)
                 {
-                    GameObject newSingleton = new GameObject();
-                    newSingleton.AddComponent<T>();
-                    _INSTANCE = newSingleton.GetComponent<T>();
-                    _INSTANCE.gameObject.name = newSingleton.GetComponent<T>().GetType().ToString();
+                    _INSTANCE = FindInstancesInScene();
 
-                    if(dontDestroy)
+                    if(null == _INSTANCE)
                     {
-                        DontDestroyOnLoad(_INSTANCE);
+                        if(createNewIfNull)
+                        {
+                            GameObject newSingleton = new GameObject();
+                            newSingleton.AddComponent<T>();
+                            _INSTANCE = newSingleton.GetComponent<T>();
+                            _INSTANCE.gameObject.name = newSingleton.GetComponent<T>().GetType().ToString();
+
+                            if (dontDestroy)
+                            {
+                                DontDestroyOnLoad(_INSTANCE);
+                            }
+                            return _INSTANCE;
+                        }
+                        else
+                        {
+                            if(debug)
+                            {
+                                Debug.LogError("No Singleton is created, could not find any monobehavioursingleton object in the hierarchy");
+                            }
+                        }
                     }
-                    return _INSTANCE;
                 }
-                return null;
-            }
-            else if (assetsCreated.Length > 1)
-            {
-                Debug.LogWarning("Multiple instances of monobehavioursingleton object found in the hierarchy");
-            }
-            _INSTANCE = assetsCreated[0];
-            if (dontDestroy)
-            {
-                DontDestroyOnLoad(_INSTANCE);
+
+                FindInstancesInScene();
+                return _INSTANCE;
             }
         }
-        return _INSTANCE;
+
+        private static T FindInstancesInScene()
+        {
+            T[] instancesInScene = FindObjectsOfType<T>();
+
+            if (instancesInScene.Length > 1)
+                Debug.LogWarning("[Singleton WARNING] More than 1 SingletonMonoBehaviour of type : '" + typeof(T).ToString() + "' in the scene.");
+
+            if (instancesInScene.Length != 0)
+                return instancesInScene[0];
+
+            return null;
+        }
+
+
+        private static bool applicationIsQuitting = false;
+
+        //=======================================================
+
+        #region MONOBEHAVIOUR
+
+        protected virtual void OnDestroy()
+        {
+            _INSTANCE = null;
+        }
+
+        protected virtual void OnApplicationPause(bool pause) { }
+
+        protected virtual void OnApplicationFocus(bool focus) { }
+
+        protected virtual void OnApplicationQuit() { }
+
+        protected virtual void Awake() { }
+
+        protected virtual void Start() { }
+
+        protected virtual void Update() { }
+
+        protected virtual void LateUpdate() { }
+
+        protected virtual void FixedUpdate() { }
+
+        protected virtual void OnEnable() { }
+
+        protected virtual void OnDisable() { }
+
+        #endregion MONOBEHAVIOUR
+
+        //=======================================================
     }
 
-    private static bool applicationIsQuitting = false;
-
-    //=======================================================
-
-    #region MONOBEHAVIOUR
-
-    protected void OnDestroy()
-    {
-        //Prevent Recreating During Scene Unload
-        applicationIsQuitting = true;
-    }
-
-    protected virtual void OnApplicationPause(bool pause) { }
-
-    protected virtual void OnApplicationQuit() { }
-
-    protected virtual void Awake() { }
-
-    protected virtual void Start() { }
-
-    protected virtual void Update() { }
-
-    protected virtual void LateUpdate() { }
-
-    protected virtual void FixedUpdate() { }
-
-    protected virtual void OnEnable() { }
-
-    protected virtual void OnDisable() { }
-
-    #endregion MONOBEHAVIOUR
-
-    //=======================================================
 }

@@ -1,36 +1,47 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class SingletonScriptableobject<T> : ScriptableObject where T : SingletonScriptableobject<T>
+namespace KC_Custom
 {
-    private static T _INSTANCE;
-    //public static T INSTANCE
-    //{
-    //    get
-    //    {
-    //        return GetInstance();
-    //    }
-    //    private set { }
-    //}
-
-    public static T GetInstance(bool debug = false)
+    public class SingletonScriptableobject<T> : ScriptableObject where T : SingletonScriptableobject<T>
     {
-        if (_INSTANCE == null)
+        private static T _INSTANCE;
+        private static object _PADLOCK = new object();
+
+        public static T GetInstance(bool debug = false)
+        {
+            lock(_PADLOCK)
+            {
+                if (_INSTANCE == null)
+                {
+                    _INSTANCE = FindInstancesInProject();
+
+                    if (null == _INSTANCE)
+                    {
+                        if (debug)
+                        {
+                            Debug.LogError("No Singleton is created, could not find any monobehavioursingleton object in the hierarchy");
+                        }
+                    }
+                }
+
+                FindInstancesInProject();
+                return _INSTANCE;
+            }
+        }
+
+        private static T FindInstancesInProject()
         {
             T[] assetsCreated = Resources.LoadAll<T>("");
-            if (assetsCreated == null || assetsCreated.Length <= 0)
-            {
-                if(debug)
-                {
-                    throw new System.Exception("No Singleton is created, could not find any scriptable object in the resources");
-                }
-                return null;
-            }
-            else if (assetsCreated.Length > 1)
-            {
-                Debug.LogWarning("Multiple instances of singleton scriptable object found in the resources");
-            }
-            _INSTANCE = assetsCreated[0];
+
+            if (assetsCreated.Length > 1)
+                Debug.LogWarning("[Singleton WARNING] More than 1 SingletonScriptableobject of type : '" + typeof(T).ToString() + "' in the scene.");
+
+            if (assetsCreated.Length != 0)
+                return assetsCreated[0];
+
+            return null;
         }
-        return _INSTANCE;
     }
+
 }
