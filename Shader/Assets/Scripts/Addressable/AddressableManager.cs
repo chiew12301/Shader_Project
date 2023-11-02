@@ -32,24 +32,24 @@ public class AddressableManager : MonoBehaviour
 
     private void AddressableManagerCompleted(AsyncOperationHandle<IResourceLocator> obj)
     {
-        Loading.GetInstance().UIStatus(true);
+        //Loading.GetInstance().UIStatus(true);
 
         this.m_AssetReference.LoadAssetAsync<GameObject>().Completed += (loadedAssetsOBJData) =>
         {
             Debug.Log("loading");
-            Loading.GetInstance().UpdateText("Loading Assets...");
+            //Loading.GetInstance().UpdateText("Loading Assets...");
 
             this.m_AssetReference.InstantiateAsync().Completed += (loadedAssetsOBJ) =>
             {
                 Debug.Log("loaded");
-                Loading.GetInstance().UpdateText("Loaded and Created!");
+                //Loading.GetInstance().UpdateText("Loaded and Created!");
 
                 //instantiate object
                 this.m_spawnedObject = loadedAssetsOBJ.Result;
             };
         };
 
-        Loading.GetInstance().UpdateText("Loading Music");
+        //Loading.GetInstance().UpdateText("Loading Music");
 
         this.m_musicReferences.LoadAssetAsync<AudioClip>().Completed += (clip) =>
         {
@@ -59,15 +59,15 @@ public class AddressableManager : MonoBehaviour
             audioSource.loop = true;
             audioSource.Play();
             Debug.Log("Loaded Music");
-            Loading.GetInstance().UpdateText("Loaded Music");
+            //Loading.GetInstance().UpdateText("Loaded Music");
         };
 
-        Loading.GetInstance().UpdateText("Loading texture");
+        //Loading.GetInstance().UpdateText("Loading texture");
 
         this.m_textureReferences.LoadAssetAsync<Texture2D>().Completed += (textureLoaded) =>
         {
             Debug.Log("Loaded Texture and assigning Texture");
-            Loading.GetInstance().UpdateText("Loaded Texture and assigning Texture");
+            //Loading.GetInstance().UpdateText("Loaded Texture and assigning Texture");
 
             this.m_image.texture = this.m_textureReferences.Asset as Texture2D;
             Color currentColor = this.m_image.color;
@@ -75,7 +75,7 @@ public class AddressableManager : MonoBehaviour
             this.m_image.color = currentColor;
         };
 
-        Loading.GetInstance().UIStatus(false);
+        //Loading.GetInstance().UIStatus(false);
     }
 
     private void ReleaseAddressable()
