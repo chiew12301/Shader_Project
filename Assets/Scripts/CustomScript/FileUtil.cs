@@ -21,7 +21,7 @@ namespace KC_Custom
         #if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
         public static string GAME_FOLDER { get { return ""; } }
 #else
-        public static string GAME_FOLDER { get { return string.Format( "{0}/", Application.persistentDataPath ; } }
+        public static string GAME_FOLDER { get { return string.Format( "{0}/", Application.persistentDataPath ) ; } }
 #endif
 
         public static string SAVE_FOLDER { get { return FileUtil.EnsureDirectoryExists(FileUtil.GAME_FOLDER + "Saves/"); } }
