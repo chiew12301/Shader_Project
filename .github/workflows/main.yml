@@ -82,41 +82,6 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: '-myParameter myValue -myBoolean -ThirdParameter andItsValue'
           buildMethod: Cgs.Editor.BuildCgs.BuildOptions
-      - name: Sleep for Retry
-        if: ${{ steps.build-0.outcome == 'failure' }}
-        run: Start-Sleep -s 120
-      - name: Build Retry
-        id: build-1
-        continue-on-error: true
-        timeout-minutes: 45
-        if: steps.build-0.outcome == 'failure'
-      - uses: game-ci/unity-builder@v3
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          unityVersion: ${{ matrix.unityVersion }}
-          targetPlatform: ${{ matrix.targetPlatform }}
-          customParameters: '-myParameter myValue -myBoolean -ThirdParameter andItsValue'
-          buildMethod: Cgs.Editor.BuildCgs.BuildOptions
-      - name: Sleep for Retry 2
-        if: ${{ steps.build-0.outcome == 'failure' && steps.build-1.outcome == 'failure' }}
-        run: Start-Sleep -s 240
-      - name: Build Retry 2
-        id: build-2
-        timeout-minutes: 45
-        if: ${{ steps.build-0.outcome == 'failure' && steps.build-1.outcome == 'failure' }}
-      - uses: game-ci/unity-builder@v3
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          unityVersion: ${{ matrix.unityVersion }}
-          targetPlatform: ${{ matrix.targetPlatform }}
-          customParameters: '-myParameter myValue -myBoolean -ThirdParameter andItsValue'
-          buildMethod: Cgs.Editor.BuildCgs.BuildOptions
       - uses: actions/upload-artifact@v3
         with:
           name: Build-${{ matrix.targetPlatform }}
