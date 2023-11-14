@@ -54,6 +54,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        providerStrategy:
+          # - local-docker
+          - local
         projectPath:
           - Shader_Project
         unityVersion:
@@ -104,7 +107,7 @@ jobs:
         with:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
-          customParameters: -standaloneBuildSubtarget Server
+          customParameters: '-myParameter myValue -myBoolean -ThirdParameter andItsValue'
           allowDirtyBuild: true
       - name: Sleep for Retry
         if: ${{ steps.build-1.outcome == 'failure' }}
@@ -123,7 +126,7 @@ jobs:
         with:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
-          customParameters: -standaloneBuildSubtarget Server
+          customParameters: '-myParameter myValue -myBoolean -ThirdParameter andItsValue'
           allowDirtyBuild: true
 
       - name: Sleep for Retry
@@ -142,7 +145,7 @@ jobs:
         with:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
-          customParameters: -standaloneBuildSubtarget Server
+          customParameters: '-myParameter myValue -myBoolean -ThirdParameter andItsValue'
           allowDirtyBuild: true
           
       - uses: actions/upload-artifact@v3
@@ -156,6 +159,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        providerStrategy:
+          # - local-docker
+          - local
         projectPath:
           - Shader_Project
         unityVersion:
