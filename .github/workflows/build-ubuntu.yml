@@ -16,8 +16,8 @@ jobs:
           - 2021.3.8f1
         targetPlatform:
           #- StandaloneLinux64 # Build a Linux 64-bit standalone.
-          - iOS # Build an iOS player.
-          - Android # Build an Android player.
+          #- iOS # Build an iOS player.
+          #- Android # Build an Android player.
           - WebGL # WebGL.
 
     steps:
@@ -32,6 +32,8 @@ jobs:
           restore-keys: |
             Library-ubuntu-
             Library-
+      - if : matrix.targetPlatform == 'WebGL'
+        run: unity-installer --unattended --components=WebGL
       - if: matrix.targetPlatform == 'Android' || matrix.targetPlatform == 'WebGL'
         uses: jlumbroso/free-disk-space@v1.3.0
       - uses: game-ci/unity-builder@v3.1.0
