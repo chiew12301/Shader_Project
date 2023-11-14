@@ -36,7 +36,7 @@ jobs:
             Library-${{ matrix.projectPath }}-
             Library-
       - name: Accept Unity License Agreement
-        run: echo y | sudo unity-installer --unattended --components=Unity
+        run: Start-Process -FilePath "unity-installer" -ArgumentList "--unattended", "--components=Unity" -Verb RunAs
       - uses: game-ci/unity-builder@v3
         continue-on-error: true
         env:
