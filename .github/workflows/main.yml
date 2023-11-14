@@ -32,7 +32,7 @@ jobs:
           restore-keys: |
             Library-ubuntu-
             Library-
-      - if: matrix.targetPlatform == 'Android'
+      - if: matrix.targetPlatform == 'Android' || matrix.targetPlatform == 'WebGL'
         uses: jlumbroso/free-disk-space@v1.3.0
       - uses: game-ci/unity-builder@v3.1.0
         env:
@@ -50,7 +50,7 @@ jobs:
 
   buildForWindowsBasedPlatforms:
     name: Build for ${{ matrix.targetPlatform }}
-    runs-on: windows-2022
+    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
@@ -72,21 +72,6 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Create LFS file list
-        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
-
-      - name: Restore LFS cache
-        uses: actions/cache@v2
-        id: lfs-cache
-        with:
-          path: .git/lfs
-          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
-
-      - name: Git LFS Pull
-        run: |
-          git lfs pull
-          git add .
-          git reset --hard
       - uses: actions/cache@v3
         with:
           path: Library
@@ -94,8 +79,7 @@ jobs:
           restore-keys: |
             Library-windows-
             Library-
-      - if: matrix.targetPlatform == 'Android'
-        uses: jlumbroso/free-disk-space@v1.3.0
+      - uses: jlumbroso/free-disk-space@v1.3.0
       - uses: game-ci/unity-builder@v3.1.0
         id: build-1
         continue-on-error: true
@@ -113,7 +97,7 @@ jobs:
         if: ${{ steps.build-1.outcome == 'failure' }}
         run: |
           Start-Sleep -s 120
-          
+      - uses: jlumbroso/free-disk-space@v1.3.0
       - uses: game-ci/unity-builder@v3.1.0
         id: build-2
         continue-on-error: true
@@ -133,7 +117,7 @@ jobs:
         if: ${{ steps.build-1.outcome == 'failure' && steps.build-2.outcome == 'failure' }}
         run: |
           Start-Sleep -s 240
-          
+      - uses: jlumbroso/free-disk-space@v1.3.0
       - uses: game-ci/unity-builder@v3.1.0
         id: build-3
         timeout-minutes: 30
