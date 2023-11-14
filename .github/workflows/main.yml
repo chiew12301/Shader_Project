@@ -9,8 +9,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        projectPath:
-          - Shader_Project
+        providerStrategy:
+          # - local-docker
+          - local
         unityVersion:
           - 2021.3.8f1
         targetPlatform:
@@ -27,8 +28,10 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: Library
-          key: Library-${{ matrix.targetPlatform }}
-          restore-keys: Library-
+          key: Library-ubuntu-${{ matrix.targetPlatform }}
+          restore-keys: |
+            Library-ubuntu-
+            Library-
       - if: matrix.targetPlatform == 'Android'
         uses: jlumbroso/free-disk-space@v1.3.0
       - uses: game-ci/unity-builder@v3.1.0
@@ -84,8 +87,10 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: Library
-          key: Library-${{ matrix.targetPlatform }}
-          restore-keys: Library-
+          key: Library-windows-${{ matrix.targetPlatform }}
+          restore-keys: |
+            Library-windows-
+            Library-
       - if: matrix.targetPlatform == 'Android'
         uses: jlumbroso/free-disk-space@v1.3.0
       - uses: game-ci/unity-builder@v3.1.0
