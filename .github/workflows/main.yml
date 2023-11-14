@@ -79,8 +79,7 @@ jobs:
           restore-keys: |
             Library-windows-
             Library-
-      - uses: jlumbroso/free-disk-space@v1.3.0
-      - uses: game-ci/unity-builder@v3.1.0
+      - uses: game-ci/unity-builder@v3
         id: build-1
         continue-on-error: true
         timeout-minutes: 30
@@ -97,8 +96,7 @@ jobs:
         if: ${{ steps.build-1.outcome == 'failure' }}
         run: |
           Start-Sleep -s 120
-      - uses: jlumbroso/free-disk-space@v1.3.0
-      - uses: game-ci/unity-builder@v3.1.0
+      - uses: game-ci/unity-builder@v3
         id: build-2
         continue-on-error: true
         timeout-minutes: 30
@@ -117,8 +115,7 @@ jobs:
         if: ${{ steps.build-1.outcome == 'failure' && steps.build-2.outcome == 'failure' }}
         run: |
           Start-Sleep -s 240
-      - uses: jlumbroso/free-disk-space@v1.3.0
-      - uses: game-ci/unity-builder@v3.1.0
+      - uses: game-ci/unity-builder@v3
         id: build-3
         timeout-minutes: 30
         if: ${{ steps.build-1.outcome == 'failure' && steps.build-2.outcome == 'failure' }}
