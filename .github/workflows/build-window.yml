@@ -1,6 +1,6 @@
 name: window build
-
-on: [push]
+on:
+  workflow_dispatch: {}
 
 jobs:
   buildForWindowsBasedPlatforms:
@@ -35,8 +35,6 @@ jobs:
             Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}
             Library-${{ matrix.projectPath }}-
             Library-
-      - name: Accept Unity License Agreement
-        run: Start-Process -FilePath "unity-installer" -ArgumentList "--unattended", "--components=Unity" -Verb RunAs
       - uses: game-ci/unity-builder@v3
         continue-on-error: true
         env:
