@@ -17,6 +17,7 @@ jobs:
           #- StandaloneLinux64 # Build a Linux 64-bit standalone.
           - iOS # Build an iOS player.
           - Android # Build an Android player.
+          - WebGL # WebGL.
 
     steps:
       - uses: actions/checkout@v3
@@ -59,7 +60,6 @@ jobs:
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
           #- tvOS # Build an AppleTV player.
           #- WSAPlayer # Build a UWP App.
-          - WebGL # WebGL.
 
     steps:
       - uses: actions/checkout@v3
@@ -84,7 +84,7 @@ jobs:
         with:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
-          customParameters: '-myParameter myValue -myBoolean -ThirdParameter andItsValue'
+          customParameters: -standaloneBuildSubtarget Server
           allowDirtyBuild: true
       - name: Sleep for Retry
         if: ${{ steps.build-1.outcome == 'failure' }}
@@ -103,7 +103,7 @@ jobs:
         with:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
-          customParameters: '-myParameter myValue -myBoolean -ThirdParameter andItsValue'
+          customParameters: -standaloneBuildSubtarget Server
           allowDirtyBuild: true
 
       - name: Sleep for Retry
@@ -122,7 +122,7 @@ jobs:
         with:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
-          customParameters: '-myParameter myValue -myBoolean -ThirdParameter andItsValue'
+          customParameters: -standaloneBuildSubtarget Server
           allowDirtyBuild: true
           
       - uses: actions/upload-artifact@v3
