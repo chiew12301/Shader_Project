@@ -88,10 +88,6 @@ jobs:
           restore-keys: Library-
       - if: matrix.targetPlatform == 'Android'
         uses: jlumbroso/free-disk-space@v1.3.0
-
-      - name: Set Scripting Backend To il2cpp
-        run: |
-          Move-Item -Path "./test-project/ProjectSettings/ProjectSettingsIl2cpp.asset" -Destination "./test-project/ProjectSettings/ProjectSettings.asset" -Force
       - uses: game-ci/unity-builder@v3.1.0
         id: build-1
         continue-on-error: true
