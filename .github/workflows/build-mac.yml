@@ -1,7 +1,6 @@
-name: Build Files
-
-on: [push]
-
+name: Build Maxos
+on:
+  workflow_dispatch: {}
 jobs:
   buildForMacOSBasedPlatforms:
     name: Build for ${{ matrix.targetPlatform }}
