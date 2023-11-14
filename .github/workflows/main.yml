@@ -73,7 +73,9 @@ jobs:
       - if: matrix.targetPlatform == 'Android'
         uses: jlumbroso/free-disk-space@v1.3.0
       - uses: game-ci/unity-builder@v3
-        id: build-0
+        id: build-1
+        continue-on-error: true
+        timeout-minutes: 30
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -82,8 +84,17 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: '-myParameter myValue -myBoolean -ThirdParameter andItsValue'
-      - if: steps.build-0.outcome == 'failure'
-        uses: game-ci/unity-builder@v3
+          allowDirtyBuild: true
+      - name: Sleep for Retry
+        if: ${{ steps.build-1.outcome == 'failure' }}
+        run: |
+          Start-Sleep -s 120
+          
+      - uses: game-ci/unity-builder@v3
+        id: build-2
+        continue-on-error: true
+        timeout-minutes: 30
+        if: steps.build-1.outcome == 'failure'
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -92,6 +103,27 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: '-myParameter myValue -myBoolean -ThirdParameter andItsValue'
+          allowDirtyBuild: true
+
+      - name: Sleep for Retry
+        if: ${{ steps.build-1.outcome == 'failure' && steps.build-2.outcome == 'failure' }}
+        run: |
+          Start-Sleep -s 240
+          
+      - uses: game-ci/unity-builder@v3
+        id: build-3
+        timeout-minutes: 30
+        if: ${{ steps.build-1.outcome == 'failure' && steps.build-2.outcome == 'failure' }}
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          customParameters: '-myParameter myValue -myBoolean -ThirdParameter andItsValue'
+          allowDirtyBuild: true
+          
       - uses: actions/upload-artifact@v3
         with:
           name: Build-${{ matrix.targetPlatform }}
