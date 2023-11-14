@@ -1,6 +1,7 @@
 name: ubuntu build
+on:
+  workflow_dispatch: {}
 
-on: [push]
 
 jobs:
   buildAndTestForLinuxBasedPlatforms:
@@ -32,8 +33,6 @@ jobs:
           restore-keys: |
             Library-ubuntu-
             Library-
-      - if : matrix.targetPlatform == 'WebGL'
-        run: unity-installer --unattended --components=WebGL
       - if: matrix.targetPlatform == 'Android' || matrix.targetPlatform == 'WebGL'
         uses: jlumbroso/free-disk-space@v1.3.0
       - uses: game-ci/unity-builder@v3.1.0
