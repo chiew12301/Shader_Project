@@ -13,11 +13,9 @@ jobs:
           # - local-docker
           - local
         projectPath:
-          - Shader_Project
+          - ./
         unityVersion:
           - 2021.3.8f1
-          - 2022.3.13f1
-          - 2023.1.19f1
         targetPlatform:
           #- StandaloneWindows # Build a Windows 32-bit standalone.
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
@@ -31,10 +29,11 @@ jobs:
           lfs: true
       - uses: actions/cache@v3
         with:
-          path: Library
-          key: Library-windows-${{ matrix.targetPlatform }}
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}
           restore-keys: |
-            Library-windows-
+            Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}
+            Library-${{ matrix.projectPath }}-
             Library-
       - uses: game-ci/unity-builder@v3
         continue-on-error: true
