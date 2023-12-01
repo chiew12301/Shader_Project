@@ -9,4 +9,5 @@ The research are included below:
 - Shader URP research. Combination with VFX Graph.
 - CI/CD Unity Research with Github Action. Automation Build.
 - Custom Scripting for plugin.
+- Job System performance improve.
 - and more in the future.
