@@ -10,4 +10,5 @@ The research are included below:
 - CI/CD Unity Research with Github Action. Automation Build.
 - Custom Scripting for plugin.
 - Job System performance improve.
+- Asset Bundle Build Scripts.
 - and more in the future.
