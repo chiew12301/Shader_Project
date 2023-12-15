@@ -11,4 +11,5 @@ The research are included below:
 - Custom Scripting for plugin.
 - Job System performance improve.
 - Asset Bundle Build Scripts.
+- FSM example.
 - and more in the future.
