@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -147,6 +148,7 @@ namespace BUILDTOOLS
             options.target = tar;
             options.targetGroup = this.GetTargetGroupForTarget(tar);
 
+            this.DebugInConsole($"Start building for {tar.ToString()}");
 
             switch(tar)
             {
@@ -208,3 +210,4 @@ namespace BUILDTOOLS
         }
     }
 }
+#endif
