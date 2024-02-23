@@ -11,10 +11,20 @@ namespace BUILDTOOLS
     public class BuildTools : EditorWindow
     {
         private string m_fileName = "Default";
+        private string m_customFilePath = "Default";
+        private bool m_useCustomFileName = false;
+        private bool m_useCustomFilePath = false;
+
         [MenuItem("Tools/Build Tools")]
         public static void OnShowTools()
         {
-            EditorWindow.GetWindow<BuildTools>();
+            const int width = 800;
+            const int height = 800;
+
+            var x = (Screen.currentResolution.width - width) / 2;
+            var y = (Screen.currentResolution.height - height) / 2;
+
+            EditorWindow.GetWindow<BuildTools>("KC Custom Build Tools").position = new Rect(x, y, width, height);;
         }
 
         private BuildTargetGroup GetTargetGroupForTarget(BuildTarget target) => target switch
@@ -63,8 +73,23 @@ namespace BUILDTOOLS
         private void OnGUI() 
         {
             GUILayout.Label("Muti-Platform Builds", EditorStyles.boldLabel);
-            GUILayout.Label("Key in your file name. (Default will automatically be settings name)", EditorStyles.boldLabel);
-            this.m_fileName = GUILayout.TextField(this.m_fileName, 40);
+
+            this.m_useCustomFileName = EditorGUILayout.Toggle("Custom File Name?", this.m_useCustomFileName);
+
+            if(this.m_useCustomFileName)
+            {
+                GUILayout.Label("Key in your file name. (Default will automatically be settings name)", EditorStyles.boldLabel);
+                this.m_fileName = GUILayout.TextField(this.m_fileName, 40);
+            }
+
+            this.m_useCustomFilePath = EditorGUILayout.Toggle("Custom File Path?", this.m_useCustomFilePath);
+
+            if(this.m_useCustomFilePath)
+            {
+                GUILayout.Label("Key in your file path. (Default will automatically file path)", EditorStyles.boldLabel);
+                this.m_customFilePath = GUILayout.TextField(this.m_customFilePath, 100);
+            }
+
 
             GUILayout.Label("Kindly select the platform you wish to build.", EditorStyles.boldLabel);
             int numberEnabled = 0;
@@ -154,27 +179,34 @@ namespace BUILDTOOLS
 
             this.DebugInConsole($"Start building for {tar.ToString()}");
 
-            string fileName = this.m_fileName;
+            string fileName = this.m_fileName == "" ? "Default" : this.m_fileName;
 
             if(fileName == "Default")
             {
                 fileName = PlayerSettings.productName;
             }
 
+            string filePath = this.m_customFilePath == "" ? "Default" : this.m_customFilePath;
+
+            if(filePath == "Default")
+            {
+                filePath = "Builds";
+            }
+
             switch(tar)
             {
                 case BuildTarget.Android:
                     string apkName = fileName + ".apk";
-                    options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), apkName);
+                    options.locationPathName = System.IO.Path.Combine(filePath, tar.ToString(), apkName);
                     break;
                 case BuildTarget.StandaloneWindows64:
-                    options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), fileName + ".exe");
+                    options.locationPathName = System.IO.Path.Combine(filePath, tar.ToString(), fileName + ".exe");
                     break;
                 case BuildTarget.StandaloneLinux64:
-                    options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), fileName + ".x86_64");
+                    options.locationPathName = System.IO.Path.Combine(filePath, tar.ToString(), fileName + ".x86_64");
                     break;
                 default:
-                    options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), fileName);
+                    options.locationPathName = System.IO.Path.Combine(filePath, tar.ToString(), fileName);
                     break;
             }
 
