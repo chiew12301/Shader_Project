@@ -10,6 +10,7 @@ namespace BUILDTOOLS
 {
     public class BuildTools : EditorWindow
     {
+        private string m_fileName = "Default";
         [MenuItem("Tools/Build Tools")]
         public static void OnShowTools()
         {
@@ -62,7 +63,10 @@ namespace BUILDTOOLS
         private void OnGUI() 
         {
             GUILayout.Label("Muti-Platform Builds", EditorStyles.boldLabel);
+            GUILayout.Label("Key in your file name. (Default will automatically be settings name)", EditorStyles.boldLabel);
+            this.m_fileName = GUILayout.TextField(this.m_fileName, 40);
 
+            GUILayout.Label("Kindly select the platform you wish to build.", EditorStyles.boldLabel);
             int numberEnabled = 0;
             foreach(BuildTarget target in this.m_availableTarget)
             {
@@ -150,20 +154,27 @@ namespace BUILDTOOLS
 
             this.DebugInConsole($"Start building for {tar.ToString()}");
 
+            string fileName = this.m_fileName;
+
+            if(fileName == "Default")
+            {
+                fileName = PlayerSettings.productName;
+            }
+
             switch(tar)
             {
                 case BuildTarget.Android:
-                    string apkName = PlayerSettings.productName + ".apk";
+                    string apkName = fileName + ".apk";
                     options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), apkName);
                     break;
                 case BuildTarget.StandaloneWindows64:
-                    options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), PlayerSettings.productName + ".exe");
+                    options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), fileName + ".exe");
                     break;
                 case BuildTarget.StandaloneLinux64:
-                    options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), PlayerSettings.productName + ".x86_64");
+                    options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), fileName + ".x86_64");
                     break;
                 default:
-                    options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), PlayerSettings.productName);
+                    options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), fileName);
                     break;
             }
 
