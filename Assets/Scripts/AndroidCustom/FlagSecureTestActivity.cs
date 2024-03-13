@@ -1,24 +1,27 @@
 using UnityEngine;
 
-public class FlagSecureTestActivity : MonoBehaviour
+namespace ANDROIDCUSTOM
 {
-    void Start()
+    public class FlagSecureTestActivity : MonoBehaviour
     {
-        Screen.fullScreen = false;
-        Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
-        this.SetFlagSecure();
-    }
-
-    void SetFlagSecure()
-    {
-        using (AndroidJavaClass unityPlayerClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+        void Start()
         {
-            AndroidJavaObject activity = unityPlayerClass.GetStatic<AndroidJavaObject>("currentActivity");
-            activity.Call("runOnUiThread", new AndroidJavaRunnable(() =>
+            Screen.fullScreen = false;
+            Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+            this.SetFlagSecure();
+        }
+
+        void SetFlagSecure()
+        {
+            using (AndroidJavaClass unityPlayerClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
             {
-                AndroidJavaClass secureFlagHelperClass = new AndroidJavaClass("com.hkpolice.unityapp.SecureFlagHelper");
-                secureFlagHelperClass.CallStatic("setFlagSecure", activity);
-            }));
+                AndroidJavaObject activity = unityPlayerClass.GetStatic<AndroidJavaObject>("currentActivity");
+                activity.Call("runOnUiThread", new AndroidJavaRunnable(() =>
+                {
+                    AndroidJavaClass secureFlagHelperClass = new AndroidJavaClass("com.hkpolice.unityapp.SecureFlagHelper");
+                    secureFlagHelperClass.CallStatic("setFlagSecure", activity);
+                }));
+            }
         }
     }
 }
