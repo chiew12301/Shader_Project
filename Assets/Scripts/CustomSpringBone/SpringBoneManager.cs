@@ -10,9 +10,13 @@ namespace KC_2D
 
         [Header("Spring bone settings")]
         [SerializeField] private bool m_overrideSpringBoneSetting = false;
-        [Header("Spring bone Collision Settings")]
-        [SerializeField] private LayerMask m_collisionLayer;
-        [SerializeField] private float m_minDistance = 0.1f;
+        [SerializeField] private bool m_contanstUpdateSpringBoneSettings = true;
+        [SerializeField] private float m_stiffness = 100.0f;
+        [SerializeField, Range(0.0f, 0.9f)] private float m_damping = 5.0f;
+        [SerializeField] private float m_bounciness = 40.0f;
+        [SerializeField] private Vector3 m_customRotiation = Vector3.zero;
+        [SerializeField] private bool m_useSpecifiedRotation = false;
+        [SerializeField] private Vector3 m_springEnd = Vector3.left;
         //=======================================================================
 
         private void Start()
@@ -22,6 +26,11 @@ namespace KC_2D
         }
 
         private void Update()
+        {
+
+        }
+
+        private void LateUpdate()
         {
             this.UpdateSpringBones();
         }
@@ -40,19 +49,23 @@ namespace KC_2D
         {
             if(!this.m_overrideSpringBoneSetting) return;
 
-            if(this.m_springBones.Count > 0) return;
+            if(this.m_springBones.Count <= 0) return;
 
             foreach (SpringBone bone in this.m_springBones)
             {
-                bone.InitializeSpringBone(this.m_collisionLayer, this.m_minDistance);
+                bone.InitializeSpringBone(this.m_stiffness, this.m_damping, this.m_bounciness, this.m_customRotiation, this.m_springEnd, this.m_useSpecifiedRotation);
             }
         }
 
         private void UpdateSpringBones()
         {
-            foreach (SpringBone bone in this.m_springBones)
+            if(this.m_contanstUpdateSpringBoneSettings)
             {
-                bone.UpdateSpringBone();
+                foreach (SpringBone bone in this.m_springBones)
+                {
+                    bone.InitializeSpringBone(this.m_stiffness, this.m_damping, this.m_bounciness, this.m_customRotiation, this.m_springEnd, this.m_useSpecifiedRotation);
+                }
+                return;
             }
         }
 
