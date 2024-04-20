@@ -41,7 +41,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
             //Get the camera info of the default rendering pass
             ScriptableRenderer renderer = renderingData.cameraData.renderer;
             RenderTargetIdentifier colorHandle = renderer.cameraColorTarget;
-            RenderTargetIdentifier depthHandle = renderer.cameraColorTarget;
+            RenderTargetIdentifier depthHandle = renderer.cameraDepthTarget;
 
             //Generate necessary data for the pixel renderer
             DrawingSettings drawingSettings = CreateDrawingSettings(m_ShaderTagIdList, ref renderingData, sortingCriteria);

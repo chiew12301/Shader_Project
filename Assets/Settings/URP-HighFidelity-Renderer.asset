@@ -16,7 +16,7 @@ MonoBehaviour:
   settings:
     layerMask:
       serializedVersion: 2
-      m_Bits: 64
+      m_Bits: 2147483647
     evt: 450
     matBlit: {fileID: 2100000, guid: 4d8b57ce76b9c544488c8108bd6fc050, type: 2}
     pixelDensity: 12.37

@@ -339,7 +339,7 @@ MonoBehaviour:
   DestroyWhenStateAuthorityLeaves: 0
   AllowStateAuthorityOverride: 1
   AoiPositionSource: {fileID: 0}
-  Flags: 2561
+  Flags: 133633
   NetworkGuid:
     RawGuidValue: 0bb58f6cd6d942ce932058b35bfd9963
   NestedObjects: []
@@ -2935,7 +2935,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1105312899}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -48.7, y: 2.5, z: 15.603088}
+  m_LocalPosition: {x: -2.8, y: 2.5, z: 24.1}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3289,15 +3289,15 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1246602244}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: 0.11285675, y: -0, z: -0, w: 0.9936113}
+  m_LocalPosition: {x: 0, y: 20.3, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1704495026}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 12.96, y: 0, z: 0}
 --- !u!114 &1246602248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3767,7 +3767,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 2858d8089dcb7934a9f7045bd10338d0,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 40.3
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2858d8089dcb7934a9f7045bd10338d0,
         type: 3}
@@ -6031,7 +6031,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1982486377
 MonoBehaviour:
   m_ObjectHideFlags: 0
