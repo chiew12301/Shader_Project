@@ -1,0 +1,22 @@
+#import "ScreenshotDetector.h"
+
+@implementation ScreenshotDetector
+
++ (void)startObservingScreenshotNotification {
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(screenshotTaken)
+                                                 name:UIApplicationUserDidTakeScreenshotNotification
+                                               object:nil];
+}
+
++ (void)stopObservingScreenshotNotification {
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:UIApplicationUserDidTakeScreenshotNotification
+                                                  object:nil];
+}
+
++ (void)screenshotTaken {
+    // No need to call UnitySendMessage directly from here, it will be done from C#
+}
+
+@end

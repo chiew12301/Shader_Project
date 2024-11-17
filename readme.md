@@ -13,4 +13,5 @@ The research are included below:
 - Job System performance improve.
 - Asset Bundle Build Scripts.
 - FSM example. (For AI/Combat system)
+- Custom Build Tools with Unity Build pipeline.
 - and more in the future.
