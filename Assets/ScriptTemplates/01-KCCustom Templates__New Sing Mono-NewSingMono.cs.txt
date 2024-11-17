@@ -1,0 +1,47 @@
+using UnityEngine;
+using KC_Custom;
+
+#ROOTNAMESPACEBEGIN#
+namespace KC_Custom
+{
+    public class #SCRIPTNAME# : MonobehaviourSingleton<#SCRIPTNAME#>
+    {
+        //Variables
+
+        //===========================================================
+
+        //Override Functions
+        protected override void Awake()
+        {
+            base.Awake();
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+        } 
+
+
+        //===========================================================
+
+        //Other Functions
+
+        //===========================================================
+    }
+}
+#ROOTNAMESPACEEND#

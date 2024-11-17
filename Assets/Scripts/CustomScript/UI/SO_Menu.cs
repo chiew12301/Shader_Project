@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace KC_Custom
 {
-    [CreateAssetMenu(fileName = "SO_Menu", menuName = "XTT/SO_Menu")]
+    [CreateAssetMenu(fileName = "SO_Menu", menuName = "KC_Custom/SO_Menu")]
     public class SO_Menu : SingletonScriptableobject<SO_Menu>
     {
         [SerializeField] private AMenu[] m_menuPrefabs;
