@@ -45,7 +45,7 @@ public class PlayerController : MonobehaviourSingleton<PlayerController>
 
     private void MovePlayerPosition()
     {
-        this.m_rigidbody.velocity = this.m_inputPosition * this.m_speed * Time.deltaTime;
+        this.m_rigidbody.linearVelocity = this.m_inputPosition * this.m_speed * Time.deltaTime;
     }
 
     private void PostDataToDatabase()

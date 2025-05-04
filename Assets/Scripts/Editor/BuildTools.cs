@@ -1,30 +1,27 @@
-#if UNITY_EDITOR
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using Unity.EditorCoroutines.Editor;
+using System.Diagnostics;
+using System.IO;
+using System.Xml.Linq;
 
 namespace BUILDTOOLS
 {
     public class BuildTools : EditorWindow
     {
         private string m_fileName = "Default";
-        private string m_customFilePath = "Default";
-        private bool m_useCustomFileName = false;
-        private bool m_useCustomFilePath = false;
+        private const string m_issScriptPath = "InstallerScripts/MyInstaller.iss";
+        private bool m_createInstallerForWindows = true;
+        private bool m_createInstallerForMacOS = true;
+
 
         [MenuItem("Tools/Build Tools")]
         public static void OnShowTools()
         {
-            const int width = 800;
-            const int height = 800;
-
-            var x = (Screen.currentResolution.width - width) / 2;
-            var y = (Screen.currentResolution.height - height) / 2;
-
-            EditorWindow.GetWindow<BuildTools>("KC Custom Build Tools").position = new Rect(x, y, width, height);;
+            EditorWindow.GetWindow<BuildTools>();
         }
 
         private BuildTargetGroup GetTargetGroupForTarget(BuildTarget target) => target switch
@@ -74,22 +71,8 @@ namespace BUILDTOOLS
         {
             GUILayout.Label("Muti-Platform Builds", EditorStyles.boldLabel);
 
-            this.m_useCustomFileName = EditorGUILayout.Toggle("Custom File Name?", this.m_useCustomFileName);
-
-            if(this.m_useCustomFileName)
-            {
-                GUILayout.Label("Key in your file name. (Default will automatically be settings name)", EditorStyles.boldLabel);
-                this.m_fileName = GUILayout.TextField(this.m_fileName, 40);
-            }
-
-            this.m_useCustomFilePath = EditorGUILayout.Toggle("Custom File Path?", this.m_useCustomFilePath);
-
-            if(this.m_useCustomFilePath)
-            {
-                GUILayout.Label("Key in your file path. (Default will automatically file path)", EditorStyles.boldLabel);
-                this.m_customFilePath = GUILayout.TextField(this.m_customFilePath, 100);
-            }
-
+            GUILayout.Label("Key in your file name. (Default will automatically be settings name)", EditorStyles.boldLabel);
+            this.m_fileName = GUILayout.TextField(this.m_fileName, 40);
 
             GUILayout.Label("Kindly select the platform you wish to build.", EditorStyles.boldLabel);
             int numberEnabled = 0;
@@ -100,7 +83,21 @@ namespace BUILDTOOLS
                 if(this.m_targetsToBuild[target])numberEnabled++;
             }
 
-            if(numberEnabled > 0)
+            bool windowsSelected = m_targetsToBuild.ContainsKey(BuildTarget.StandaloneWindows64) && m_targetsToBuild[BuildTarget.StandaloneWindows64];
+            if (windowsSelected)
+            {
+                EditorGUILayout.Space();
+                m_createInstallerForWindows = EditorGUILayout.Toggle("Create Window Installer", m_createInstallerForWindows);
+            }
+
+            bool macosSelected = m_targetsToBuild.ContainsKey(BuildTarget.StandaloneOSX) && m_targetsToBuild[BuildTarget.StandaloneOSX];
+            if (macosSelected)
+            {
+                EditorGUILayout.Space();
+                m_createInstallerForMacOS = EditorGUILayout.Toggle("Create DMG", m_createInstallerForMacOS);
+            }
+
+            if (numberEnabled > 0)
             {
                 string prompt = numberEnabled == 1 ? "Build Only 1 Platform." : $"Build {numberEnabled} Platforms.";
                 if(GUILayout.Button(prompt))
@@ -177,36 +174,27 @@ namespace BUILDTOOLS
             options.target = tar;
             options.targetGroup = this.GetTargetGroupForTarget(tar);
 
-            this.DebugInConsole($"Start building for {tar.ToString()}");
-
-            string fileName = this.m_fileName == "" ? "Default" : this.m_fileName;
+            string fileName = this.m_fileName;
 
             if(fileName == "Default")
             {
                 fileName = PlayerSettings.productName;
             }
 
-            string filePath = this.m_customFilePath == "" ? "Default" : this.m_customFilePath;
-
-            if(filePath == "Default")
-            {
-                filePath = "Builds";
-            }
-
             switch(tar)
             {
                 case BuildTarget.Android:
                     string apkName = fileName + ".apk";
-                    options.locationPathName = System.IO.Path.Combine(filePath, tar.ToString(), apkName);
+                    options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), apkName);
                     break;
                 case BuildTarget.StandaloneWindows64:
-                    options.locationPathName = System.IO.Path.Combine(filePath, tar.ToString(), fileName + ".exe");
+                    options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), fileName + ".exe");
                     break;
                 case BuildTarget.StandaloneLinux64:
-                    options.locationPathName = System.IO.Path.Combine(filePath, tar.ToString(), fileName + ".x86_64");
+                    options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), fileName + ".x86_64");
                     break;
                 default:
-                    options.locationPathName = System.IO.Path.Combine(filePath, tar.ToString(), fileName);
+                    options.locationPathName = System.IO.Path.Combine("Builds", tar.ToString(), fileName);
                     break;
             }
 
@@ -230,6 +218,22 @@ namespace BUILDTOOLS
             {
                 this.DebugInConsole($"Build Succeeded at {options.locationPathName}");
                 this.DebugInConsole($"Build for {tar.ToString()} completed in {report.summary.totalTime.Seconds}.");
+
+                if (tar == BuildTarget.StandaloneWindows64 && this.m_createInstallerForWindows)
+                {
+                    string version = PlayerSettings.bundleVersion;
+                    string exeName = PlayerSettings.productName;
+                    string buildFolder = Path.GetDirectoryName(options.locationPathName);
+                    CreateInstaller(version, exeName, buildFolder);
+                }
+                else if(tar == BuildTarget.StandaloneOSX && this.m_createInstallerForMacOS)
+                {
+                    string appPath = options.locationPathName + ".app";
+                    string dmgPath = Path.Combine("Builds", tar.ToString(), fileName + ".dmg");
+
+                    CreateMacOSDmg(appPath, dmgPath);
+                }
+
                 return true;
             }
 
@@ -237,20 +241,74 @@ namespace BUILDTOOLS
             return false;
         }
 
+        private void CreateInstaller(string version, string exeName, string buildPath)
+        {
+            DebugInConsole($"Creating installer with version: {version}");
+            string issTemplate = File.ReadAllText(m_issScriptPath);
+            string issContent = issTemplate
+                .Replace("{AppVersion}", version)
+                .Replace("{SourceDir}", Path.GetFullPath(buildPath).Replace("\\", "\\\\"))
+                .Replace("{ExeName}", exeName);
+
+            string tempIssPath = Path.Combine(buildPath, "TempInstaller.iss");
+            File.WriteAllText(tempIssPath, issContent);
+
+            Process process = new Process();
+            process.StartInfo.FileName = "ISCC.exe"; // Inno Setup Compiler must be in PATH
+            process.StartInfo.Arguments = $"\"{tempIssPath}\"";
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.UseShellExecute = false;
+            process.Start();
+            process.WaitForExit();
+
+            File.Delete(tempIssPath);
+            DebugInConsole($"Installer source path: {buildPath}");
+            DebugInConsole($"Expected EXE: {exeName}.exe");
+        }
+
+        private void CreateMacOSDmg(string appPath, string dmgPath)
+        {
+            string volumeName = Path.GetFileNameWithoutExtension(appPath);
+            string tempMount = "/Volumes/" + volumeName;
+
+            string command = $"hdiutil create -volname \"{volumeName}\" -srcfolder \"{appPath}\" -ov -format UDZO \"{dmgPath}\"";
+
+            Process process = new Process();
+            process.StartInfo.FileName = "/bin/bash";
+            process.StartInfo.Arguments = $"-c \"{command}\"";
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
+
+            process.Start();
+            string output = process.StandardOutput.ReadToEnd();
+            string error = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            if (process.ExitCode == 0)
+            {
+                DebugInConsole($"macOS .dmg created at: {dmgPath}");
+            }
+            else
+            {
+                DebugErrorInConsole($"Failed to create .dmg:\n{error}");
+            }
+        }
+
         private void DebugWarningInConsole(string text)
         {
-            Debug.LogWarning($"[BUILD WARNING]: {text}");
+            UnityEngine.Debug.LogWarning($"[BUILD WARNING]: {text}");
         }
 
         private void DebugErrorInConsole(string text)
         {
-            Debug.LogError($"[BUILD ERROR]: {text}");
+            UnityEngine.Debug.LogError($"[BUILD ERROR]: {text}");
         }
 
         private void DebugInConsole(string text)
         {
-            Debug.Log($"[BUILD MESSAGE]: {text}");
+            UnityEngine.Debug.Log($"[BUILD MESSAGE]: {text}");
         }
     }
 }
-#endif
